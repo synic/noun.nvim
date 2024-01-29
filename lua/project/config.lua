@@ -35,7 +35,22 @@ M.defaults = {
   -- * global (default)
   -- * tab
   -- * win
-  scope_chdir = 'global',
+  scope_chdir = "global",
+
+  -- custom chdir function to use (optional)
+  -- if this method returns `true`, then the default method will not be used
+  -- (and obviates `silent_chdir` and `scope_chdir`). return `false` to
+  -- fall back to the default method
+  -- signature: function(path, method) -> bool
+  custom_chdir_fn = nil,
+
+  -- Function to get current directory
+  -- This is used by `find_pattern_root` to get the directory of the current buffer. For buffers like oil.nvim, the
+  -- usual vim.fn.expand will not work, since the it returns a URI instead of a path. For buffers like this, you can
+  -- customize how project.nvim obtains the current dir.
+  pattern_get_current_dir_fn = function()
+    return vim.fn.expand("%:p:h", true)
+  end,
 
   -- Path where project.nvim will store the project history for use in
   -- telescope
@@ -48,7 +63,7 @@ M.options = {}
 M.setup = function(options)
   M.options = vim.tbl_deep_extend("force", M.defaults, options or {})
 
-  local glob = require("project_nvim.utils.globtopattern")
+  local glob = require("project.utils.globtopattern")
   local home = vim.fn.expand("~")
   M.options.exclude_dirs = vim.tbl_map(function(pattern)
     if vim.startswith(pattern, "~/") then
@@ -59,8 +74,8 @@ M.setup = function(options)
 
   vim.opt.autochdir = false -- implicitly unset autochdir
 
-  require("project_nvim.utils.path").init()
-  require("project_nvim.project").init()
+  require("project.utils.path").init()
+  require("project.project").init()
 end
 
 return M

@@ -1,7 +1,7 @@
-local config = require("project_nvim.config")
-local history = require("project_nvim.utils.history")
-local glob = require("project_nvim.utils.globtopattern")
-local path = require("project_nvim.utils.path")
+local config = require("project.config")
+local history = require("project.utils.history")
+local glob = require("project.utils.globtopattern")
+local path = require("project.utils.path")
 local uv = vim.loop
 local M = {}
 
@@ -31,7 +31,7 @@ function M.find_lsp_root()
 end
 
 function M.find_pattern_root()
-  local search_dir = vim.fn.expand("%:p:h", true)
+  local search_dir = config.options.pattern_get_current_dir_fn()
   if vim.fn.has("win32") > 0 then
     search_dir = search_dir:gsub("\\", "/")
   end
@@ -172,16 +172,24 @@ end
 function M.set_pwd(dir, method)
   if dir ~= nil then
     M.last_project = dir
+
+    if config.options.custom_chdir_fn ~= nil then
+      local success = config.options.custom_chdir_fn(dir, method)
+      if success then
+        return true
+      end
+    end
+
     table.insert(history.session_projects, dir)
 
     if vim.fn.getcwd() ~= dir then
       local scope_chdir = config.options.scope_chdir
-      if scope_chdir == 'global' then
+      if scope_chdir == "global" then
         vim.api.nvim_set_current_dir(dir)
-      elseif scope_chdir == 'tab' then
-        vim.cmd('tcd ' .. dir)
-      elseif scope_chdir == 'win' then
-        vim.cmd('lcd ' .. dir)
+      elseif scope_chdir == "tab" then
+        vim.cmd("tcd " .. dir)
+      elseif scope_chdir == "win" then
+        vim.cmd("lcd " .. dir)
       else
         return
       end
@@ -251,13 +259,13 @@ end
 
 function M.add_project_manually()
   local current_dir = vim.fn.expand("%:p:h", true)
-  M.set_pwd(current_dir, 'manual')
+  M.set_pwd(current_dir, "manual")
 end
 
 function M.init()
   local autocmds = {}
   if not config.options.manual_mode then
-    autocmds[#autocmds + 1] = 'autocmd VimEnter,BufEnter * ++nested lua require("project_nvim.project").on_buf_enter()'
+    autocmds[#autocmds + 1] = 'autocmd VimEnter,BufEnter * ++nested lua require("project.project").on_buf_enter()'
 
     if vim.tbl_contains(config.options.detection_methods, "lsp") then
       M.attach_to_lsp()
@@ -265,14 +273,13 @@ function M.init()
   end
 
   vim.cmd([[
-    command! ProjectRoot lua require("project_nvim.project").on_buf_enter()
-    command! AddProject lua require("project_nvim.project").add_project_manually()
+    command! ProjectRoot lua require("project.project").on_buf_enter()
+    command! AddProject lua require("project.project").add_project_manually()
   ]])
 
-  autocmds[#autocmds + 1] =
-    'autocmd VimLeavePre * lua require("project_nvim.utils.history").write_projects_to_history()'
+  autocmds[#autocmds + 1] = 'autocmd VimLeavePre * lua require("project.utils.history").write_projects_to_history()'
 
-  vim.cmd([[augroup project_nvim
+  vim.cmd([[augroup project
             au!
   ]])
   for _, value in ipairs(autocmds) do

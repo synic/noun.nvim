@@ -3,6 +3,10 @@
 **project.nvim** is an all in one neovim plugin written in lua that provides
 superior project management.
 
+This is a fork of https://github.com/ahmedkhalf/project.nvim, which appears to
+be a dead project. There are quite a few unanswered issues and pull requests. I
+had some changes I wanted to make so I forked it.
+
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
 
 ## ⚡ Requirements
@@ -53,10 +57,10 @@ Install the plugin with your preferred package manager:
 
 ```vim
 " Vim Script
-Plug 'ahmedkhalf/project.nvim'
+Plug 'synic/project.nvim'
 
 lua << EOF
-  require("project_nvim").setup {
+  require("project").setup {
     -- your configuration comes here
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
@@ -69,9 +73,9 @@ EOF
 ```lua
 -- Lua
 use {
-  "ahmedkhalf/project.nvim",
+  "synic/project.nvim",
   config = function()
-    require("project_nvim").setup {
+    require("project").setup {
       -- your configuration comes here
       -- or leave it empty to use the default settings
       -- refer to the configuration section below
@@ -120,6 +124,21 @@ use {
   -- * tab
   -- * win
   scope_chdir = 'global',
+
+  -- custom chdir function to use (optional)
+  -- if this method returns `true`, then the default method will not be used
+  -- (and obviates `silent_chdir` and `scope_chdir`). return `false` to
+  -- fall back to the default method
+  -- signature: function(path, method) -> bool
+  custom_chdir_fn = nil,
+
+  -- Function to get current directory
+  -- This is used by `find_pattern_root` to get the directory of the current buffer. For buffers like oil.nvim, the
+  -- usual vim.fn.expand will not work, since the it returns a URI instead of a path. For buffers like this, you can
+  -- customize how project.nvim obtains the current dir.
+  pattern_get_current_dir_fn = function()
+    return vim.fn.expand("%:p:h", true)
+  end,
 
   -- Path where project.nvim will store the project history for use in
   -- telescope
@@ -202,11 +221,22 @@ require'telescope'.extensions.projects.projects{}
 Get a list of recent projects:
 
 ```lua
-local project_nvim = require("project_nvim")
-local recent_projects = project_nvim.get_recent_projects()
+local project = require("project")
+local recent_projects = project.get_recent_projects()
 
 print(vim.inspect(recent_projects))
 ```
+#### Prints: { "/path/to/a/project", "/path/to/another-project" }
+
+Get project root path:
+
+```lua
+local project = require("project")
+local project_path, method = project.get_project_root()
+
+print(project_path, method)
+```
+#### Prints: "/path/to/a/project" "pattern .git"
 
 ## 🤝 Contributing
 
