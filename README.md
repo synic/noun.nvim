@@ -220,7 +220,7 @@ require('telescope').load_extension('noun')
 #### Telescope Projects Picker
 To use the projects picker
 ```lua
-require'telescope'.extensions.noun.projects{}
+require'telescope'.extensions.noun.noun{}
 ```
 
 #### Telescope mappings
