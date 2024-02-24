@@ -154,7 +154,7 @@ end
 
 ---Main entrypoint for Telescope.
 ---@param opts table
-local function projects(opts)
+local function noun(opts)
   opts = opts or {}
 
   pickers
@@ -188,8 +188,4 @@ local function projects(opts)
     :find()
 end
 
-return telescope.register_extension({
-  exports = {
-    projects = projects,
-  },
-})
+return telescope.register_extension({ exports = { noun = noun } })

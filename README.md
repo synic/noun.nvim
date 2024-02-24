@@ -27,7 +27,7 @@ instead of `projects` (see below)
 - Automagically cd to project directory using nvim lsp
   - Dependency free, does not rely on lspconfig
 - If no lsp then uses pattern matching to cd to root directory
-- Telescope integration `:Telescope projects`
+- Telescope integration `:Telescope noun`
   - Access your recently opened projects from telescope!
   - Asynchronous file io so it will not slow down vim when reading the history
     file on startup.
