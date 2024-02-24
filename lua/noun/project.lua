@@ -1,7 +1,7 @@
-local config = require("project.config")
-local history = require("project.utils.history")
-local glob = require("project.utils.globtopattern")
-local path = require("project.utils.path")
+local config = require("noun.config")
+local history = require("noun.utils.history")
+local glob = require("noun.utils.globtopattern")
+local path = require("noun.utils.path")
 local uv = vim.loop
 local M = {}
 
@@ -173,13 +173,6 @@ function M.set_pwd(dir, method)
   if dir ~= nil then
     M.last_project = dir
 
-    if config.options.custom_chdir_fn ~= nil then
-      local success = config.options.custom_chdir_fn(dir, method)
-      if success then
-        return true
-      end
-    end
-
     table.insert(history.session_projects, dir)
 
     if vim.fn.getcwd() ~= dir then
@@ -265,7 +258,7 @@ end
 function M.init()
   local autocmds = {}
   if not config.options.manual_mode then
-    autocmds[#autocmds + 1] = 'autocmd VimEnter,BufEnter * ++nested lua require("project.project").on_buf_enter()'
+    autocmds[#autocmds + 1] = 'autocmd VimEnter,BufEnter * ++nested lua require("noun.project").on_buf_enter()'
 
     if vim.tbl_contains(config.options.detection_methods, "lsp") then
       M.attach_to_lsp()
@@ -273,11 +266,11 @@ function M.init()
   end
 
   vim.cmd([[
-    command! ProjectRoot lua require("project.project").on_buf_enter()
-    command! AddProject lua require("project.project").add_project_manually()
+    command! ProjectRoot lua require("noun.project").on_buf_enter()
+    command! AddProject lua require("noun.project").add_project_manually()
   ]])
 
-  autocmds[#autocmds + 1] = 'autocmd VimLeavePre * lua require("project.utils.history").write_projects_to_history()'
+  autocmds[#autocmds + 1] = 'autocmd VimLeavePre * lua require("noun.utils.history").write_projects_to_history()'
 
   vim.cmd([[augroup project
             au!

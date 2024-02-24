@@ -1,14 +1,14 @@
-local config = require("project.config")
+local config = require("noun.config")
 local uv = vim.loop
 local M = {}
 
 M.datapath = vim.fn.stdpath("data") -- directory
-M.projectpath = M.datapath .. "/project" -- directory
+M.projectpath = M.datapath .. "/noun" -- directory
 M.historyfile = M.projectpath .. "/history" -- file
 
 function M.init()
-  M.datapath = require("project.config").options.datapath
-  M.projectpath = M.datapath .. "/project" -- directory
+  M.datapath = require("noun.config").options.datapath
+  M.projectpath = M.datapath .. "/noun" -- directory
   M.historyfile = M.projectpath .. "/history" -- file
 end
 

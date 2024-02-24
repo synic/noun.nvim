@@ -1,6 +1,6 @@
-local config = require("project.config")
-local project = require("project.project")
-local history = require("project.utils.history")
+local config = require("noun.config")
+local project = require("noun.project")
+local history = require("noun.utils.history")
 local M = {}
 
 M.setup = config.setup

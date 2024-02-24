@@ -37,6 +37,11 @@ M.defaults = {
   -- * win
   scope_chdir = "global",
 
+  -- Optional custom callback function to be called when a project is selected.
+  -- if this function returns "true", then the default method (which is to
+  -- change the directory) will not be executed.
+  project_selected_callback_fn = nil,
+
   -- custom chdir function to use (optional)
   -- if this method returns `true`, then the default method will not be used
   -- (and obviates `silent_chdir` and `scope_chdir`). return `false` to
@@ -63,7 +68,7 @@ M.options = {}
 M.setup = function(options)
   M.options = vim.tbl_deep_extend("force", M.defaults, options or {})
 
-  local glob = require("project.utils.globtopattern")
+  local glob = require("noun.utils.globtopattern")
   local home = vim.fn.expand("~")
   M.options.exclude_dirs = vim.tbl_map(function(pattern)
     if vim.startswith(pattern, "~/") then
@@ -74,8 +79,8 @@ M.setup = function(options)
 
   vim.opt.autochdir = false -- implicitly unset autochdir
 
-  require("project.utils.path").init()
-  require("project.project").init()
+  require("noun.utils.path").init()
+  require("noun.project").init()
 end
 
 return M

@@ -1,11 +1,20 @@
-# 🗃️ project.nvim
+# 🗃️ noun.nvim
 
-**project.nvim** is an all in one neovim plugin written in lua that provides
+**noun.nvim** is an all in one neovim plugin written in lua that provides
 superior project management.
 
 This is a fork of https://github.com/ahmedkhalf/project.nvim, which appears to
 be a dead project. There are quite a few unanswered issues and pull requests. I
-had some changes I wanted to make so I forked it.
+decided to hard fork it because I wanted to take some big liberties, like
+changing the repo name and the main module name so they match, which makes the
+whole thing work better with modern package managers like lazy.nvim.
+
+## :exclamation: WARNING - BREAKING CHANGE FROM project.nvim!
+
+As mentioned above, I have changed the repository name and the module name to
+"noun", which means that you'll want to replace all occurrences in your config
+from `project_nvim` to `noun`, and pass `noun` to `telescope.load_extension`
+instead of `projects` (see below)
 
 ![Telescope Integration](https://user-images.githubusercontent.com/36672196/129409509-62340f10-4dd0-4c1a-9252-8bfedf2a9945.png)
 
@@ -53,14 +62,27 @@ had some changes I wanted to make so I forked it.
 
 Install the plugin with your preferred package manager:
 
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+{ "synic/noun.nvim", config = true }
+
+-- or as a dependency to `telescope`
+
+{
+  "nvim-telescope/telescope.nvim",
+  dependencies = { { "synic/noun.nvim", config = true } },
+},
+```
+
 ### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
 " Vim Script
-Plug 'synic/project.nvim'
+Plug 'synic/noun.nvim'
 
 lua << EOF
-  require("project").setup {
+  require("noun").setup {
     -- your configuration comes here
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
@@ -73,9 +95,9 @@ EOF
 ```lua
 -- Lua
 use {
-  "synic/project.nvim",
+  "synic/noun.nvim",
   config = function()
-    require("project").setup {
+    require("noun").setup {
       -- your configuration comes here
       -- or leave it empty to use the default settings
       -- refer to the configuration section below
@@ -86,7 +108,7 @@ use {
 
 ## ⚙️ Configuration
 
-**project.nvim** comes with the following defaults:
+**noun.nvim** comes with the following defaults:
 
 ```lua
 {
@@ -125,12 +147,10 @@ use {
   -- * win
   scope_chdir = 'global',
 
-  -- custom chdir function to use (optional)
-  -- if this method returns `true`, then the default method will not be used
-  -- (and obviates `silent_chdir` and `scope_chdir`). return `false` to
-  -- fall back to the default method
-  -- signature: function(path, method) -> bool
-  custom_chdir_fn = nil,
+  -- Optional custom callback function to be called when a project is selected.
+  -- if this function returns "true", then the default method (which is to
+  -- change the directory) will not be executed.
+  project_selected_callback_fn = nil,
 
   -- Function to get current directory
   -- This is used by `find_pattern_root` to get the directory of the current buffer. For buffers like oil.nvim, the
@@ -194,13 +214,13 @@ List your exclusions before the patterns you do want.
 
 To enable telescope integration:
 ```lua
-require('telescope').load_extension('projects')
+require('telescope').load_extension('noun')
 ```
 
 #### Telescope Projects Picker
 To use the projects picker
 ```lua
-require'telescope'.extensions.projects.projects{}
+require'telescope'.extensions.noun.projects{}
 ```
 
 #### Telescope mappings
@@ -221,8 +241,8 @@ require'telescope'.extensions.projects.projects{}
 Get a list of recent projects:
 
 ```lua
-local project = require("project")
-local recent_projects = project.get_recent_projects()
+local noun = require("noun")
+local recent_projects = noun.get_recent_projects()
 
 print(vim.inspect(recent_projects))
 ```
@@ -231,8 +251,8 @@ print(vim.inspect(recent_projects))
 Get project root path:
 
 ```lua
-local project = require("project")
-local project_path, method = project.get_project_root()
+local noun = require("noun")
+local project_path, method = noun.get_project_root()
 
 print(project_path, method)
 ```

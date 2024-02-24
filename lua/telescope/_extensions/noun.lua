@@ -14,9 +14,9 @@ local state = require("telescope.actions.state")
 local builtin = require("telescope.builtin")
 local entry_display = require("telescope.pickers.entry_display")
 
-local history = require("project.utils.history")
-local project = require("project.project")
-local config = require("project.config")
+local history = require("noun.utils.history")
+local project = require("noun.project")
+local config = require("noun.config")
 
 ----------
 -- Actions
@@ -71,6 +71,19 @@ local function change_working_directory(prompt_bufnr, prompt)
   else
     actions.close(prompt_bufnr)
   end
+
+  if config.options.project_selected_callback_fn ~= nil then
+    local status, success = pcall(config.options.project_selected_callback_fn, project_path)
+
+    if not status then
+      return project_path, false
+    end
+
+    if success then
+      return project_path, true
+    end
+  end
+
   local cd_successful = project.set_pwd(project_path, "telescope")
   return project_path, cd_successful
 end
