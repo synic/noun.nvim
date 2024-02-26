@@ -31,14 +31,7 @@ local function create_finder()
   end
   local displayer = entry_display.create({
     separator = " ",
-    items = {
-      {
-        width = 30,
-      },
-      {
-        remaining = true,
-      },
-    },
+    items = { { width = 30 }, { remaining = true } },
   })
 
   local function make_display(entry)
@@ -70,18 +63,6 @@ local function change_working_directory(prompt_bufnr, prompt)
     actions._close(prompt_bufnr, true)
   else
     actions.close(prompt_bufnr)
-  end
-
-  if config.options.project_selected_callback_fn ~= nil then
-    local status, success = pcall(config.options.project_selected_callback_fn, project_path)
-
-    if not status then
-      return project_path, false
-    end
-
-    if success then
-      return project_path, true
-    end
   end
 
   local cd_successful = project.set_pwd(project_path, "telescope")
@@ -179,6 +160,26 @@ local function noun(opts)
         map("i", "<c-w>", change_working_directory)
 
         local on_project_selected = function()
+          if config.options.project_selected_callback_fn ~= nil then
+            local selected_entry = state.get_selected_entry(prompt_bufnr)
+            if selected_entry == nil then
+              actions.close(prompt_bufnr)
+              return
+            end
+            local project_path = selected_entry.value
+            local status, success = pcall(config.options.project_selected_callback_fn, project_path)
+
+            if not status then
+              print("warning: noun project_selected_callback_fn could not be executed")
+              return
+            end
+
+            if success then
+              -- handler worked, we don't need to continue
+              return
+            end
+          end
+
           find_project_files(prompt_bufnr)
         end
         actions.select_default:replace(on_project_selected)
