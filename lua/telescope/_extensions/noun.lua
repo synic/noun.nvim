@@ -167,16 +167,14 @@ local function noun(opts)
               return
             end
             local project_path = selected_entry.value
-            local status, success = pcall(config.options.project_selected_callback_fn, project_path)
 
-            if not status then
-              print("warning: noun project_selected_callback_fn could not be executed")
-              return
-            end
+            if config.options.project_selected_callback_fn then
+              local success = config.options.project_selected_callback_fn(project_path)
 
-            if success then
-              -- handler worked, we don't need to continue
-              return
+              if success then
+                -- handler worked, we don't need to continue
+                return
+              end
             end
           end
 
