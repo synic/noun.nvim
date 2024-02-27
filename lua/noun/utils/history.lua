@@ -101,6 +101,10 @@ local function setup_watch()
   end
 end
 
+--- asynchronously read project history
+---
+--- this version of the function is called when the project history file changes,
+--- and because this can happen while you're editing, it needs to be async.
 function M.read_projects_from_history()
   open_history("r", function(_, fd)
     setup_watch()
@@ -115,6 +119,23 @@ function M.read_projects_from_history()
       end)
     end
   end)
+end
+
+--- synchronously read project history
+---
+--- this version of then function is used during `setup()` and is synchronous so that we can
+--- be sure that the project history is fully loaded by the time the `setup` function returns.
+function M.read_projects_from_history_sync()
+  local fd = open_history("r")
+
+  if fd ~= nil then
+    local stat = uv.fs_fstat(fd)
+    if stat ~= nil then
+      local data = uv.fs_read(fd, stat.size, -1)
+      uv.fs_close(fd)
+      deserialize_history(data)
+    end
+  end
 end
 
 local function sanitize_projects()

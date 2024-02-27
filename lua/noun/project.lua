@@ -280,7 +280,7 @@ function M.init()
   end
   vim.cmd("augroup END")
 
-  history.read_projects_from_history()
+  history.read_projects_from_history_sync()
 end
 
 return M
