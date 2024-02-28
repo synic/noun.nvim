@@ -133,58 +133,67 @@ local function delete_project(prompt_bufnr)
   end
 end
 
----Main entrypoint for Telescope.
----@param opts table
-local function noun(opts)
-  opts = opts or {}
+local extension = {
+  opts = {
+    previewer = false,
+  },
+}
 
-  pickers
-    .new(opts, {
-      prompt_title = "Recent Projects",
-      finder = create_finder(),
-      previewer = false,
-      sorter = telescope_config.generic_sorter(opts),
-      attach_mappings = function(prompt_bufnr, map)
-        map("n", "f", find_project_files)
-        map("n", "b", browse_project_files)
-        map("n", "d", delete_project)
-        map("n", "s", search_in_project_files)
-        map("n", "r", recent_project_files)
-        map("n", "w", change_working_directory)
-
-        map("i", "<c-f>", find_project_files)
-        map("i", "<c-b>", browse_project_files)
-        map("i", "<c-d>", delete_project)
-        map("i", "<c-s>", search_in_project_files)
-        map("i", "<c-r>", recent_project_files)
-        map("i", "<c-w>", change_working_directory)
-
-        local on_project_selected = function()
-          if config.options.project_selected_callback_fn ~= nil then
-            local selected_entry = state.get_selected_entry(prompt_bufnr)
-            if selected_entry == nil then
-              actions.close(prompt_bufnr)
-              return
-            end
-            local project_path = selected_entry.value
-
-            if config.options.project_selected_callback_fn then
-              local success = config.options.project_selected_callback_fn(project_path)
-
-              if success then
-                -- handler worked, we don't need to continue
-                return
-              end
-            end
-          end
-
-          find_project_files(prompt_bufnr)
-        end
-        actions.select_default:replace(on_project_selected)
-        return true
-      end,
-    })
-    :find()
+extension.setup = function(opts)
+  extension.opts = opts
 end
 
-return telescope.register_extension({ exports = { noun = noun } })
+extension.exports = {
+  noun = function(opts)
+    opts = vim.tbl_deep_extend("force", extension.opts, opts or {})
+    pickers
+      .new(opts, {
+        prompt_title = "Recent Projects",
+        finder = create_finder(),
+        previewer = opts.previewer,
+        sorter = telescope_config.generic_sorter(opts),
+        attach_mappings = function(prompt_bufnr, map)
+          map("n", "f", find_project_files)
+          map("n", "b", browse_project_files)
+          map("n", "d", delete_project)
+          map("n", "s", search_in_project_files)
+          map("n", "r", recent_project_files)
+          map("n", "w", change_working_directory)
+
+          map("i", "<c-f>", find_project_files)
+          map("i", "<c-b>", browse_project_files)
+          map("i", "<c-d>", delete_project)
+          map("i", "<c-s>", search_in_project_files)
+          map("i", "<c-r>", recent_project_files)
+          map("i", "<c-w>", change_working_directory)
+
+          local on_project_selected = function()
+            if config.options.project_selected_callback_fn ~= nil then
+              local selected_entry = state.get_selected_entry(prompt_bufnr)
+              if selected_entry == nil then
+                actions.close(prompt_bufnr)
+                return
+              end
+              local project_path = selected_entry.value
+
+              if config.options.project_selected_callback_fn then
+                local success = config.options.project_selected_callback_fn(project_path)
+
+                if success then
+                  -- handler worked, we don't need to continue
+                  return
+                end
+              end
+            end
+
+            find_project_files(prompt_bufnr)
+          end
+          actions.select_default:replace(on_project_selected)
+          return true
+        end,
+      })
+      :find()
+  end,
+}
+
+return telescope.register_extension(extension)
