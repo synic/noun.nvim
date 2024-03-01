@@ -134,13 +134,14 @@ local function delete_project(prompt_bufnr)
 end
 
 local extension = {
-  opts = {
-    previewer = false,
+  default_opts = {
+    prompt_title = "Recent Projects",
   },
+  opts = {},
 }
 
 extension.setup = function(opts)
-  extension.opts = opts
+  extension.opts = vim.tbl_deep_extend("force", extension.default_opts, opts or {})
 end
 
 extension.exports = {
@@ -148,9 +149,9 @@ extension.exports = {
     opts = vim.tbl_deep_extend("force", extension.opts, opts or {})
     pickers
       .new(opts, {
-        prompt_title = "Recent Projects",
+        prompt_title = opts.prompt_title,
         finder = create_finder(),
-        previewer = opts.previewer,
+        previewer = false, -- a previewer does not make sense for this
         sorter = telescope_config.generic_sorter(opts),
         attach_mappings = function(prompt_bufnr, map)
           map("n", "f", find_project_files)
