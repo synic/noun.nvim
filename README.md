@@ -1,9 +1,9 @@
-# 🗃️ noun.nvim
-
 ## DEPRECATED AND ARCHIVED
 
-I am no longer using this, and have moved to using https://github.com/synic/telescope-dirpicker 
-instead.
+I am no longer using this, and have moved to using 
+https://github.com/synic/telescope-dirpicker.nvim instead.
+
+# 🗃️ noun.nvim
 
 **noun.nvim** is an all in one neovim plugin written in lua that provides
 superior project management.
